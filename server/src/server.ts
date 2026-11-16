@@ -5,6 +5,7 @@ import { connectDatabase } from './config/db';
 import { env } from './config/env';
 import { logger } from './config/logger';
 import { verifyAccessToken } from './utils/token';
+import { getAllowedOrigins } from './utils/cors';
 import { globalProcessingQueue } from './queues/ProcessingQueue';
 
 async function bootstrap() {
@@ -15,7 +16,7 @@ async function bootstrap() {
 
   const io = new SocketIOServer(httpServer, {
     cors: {
-      origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+      origin: getAllowedOrigins(env.CLIENT_URL),
       credentials: true
     }
   });

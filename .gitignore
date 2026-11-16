@@ -3,6 +3,11 @@ dist/
 build/
 .env
 .env.local
+.env.production
+.env.*.local
+certbot/conf/live/
+certbot/conf/archive/
+certbot/conf/keys/
 uploads/
 thumbnails/
 tmp/

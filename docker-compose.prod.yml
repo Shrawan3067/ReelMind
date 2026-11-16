@@ -1,0 +1,76 @@
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: reelmind-mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: reelmind
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - reelmind-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reelmind-server
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      PORT: 5001
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongo:27017/reelmind
+      UPLOAD_DIRECTORY: /app/uploads
+      THUMBNAIL_DIRECTORY: /app/thumbnails
+    volumes:
+      - upload_data:/app/uploads
+      - thumb_data:/app/thumbnails
+    networks:
+      - reelmind-net
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: reelmind-client
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt:ro
+      - ./certbot/www:/var/www/certbot:ro
+    networks:
+      - reelmind-net
+    depends_on:
+      server:
+        condition: service_healthy
+
+networks:
+  reelmind-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    name: reelmind_mongo_data
+  upload_data:
+    name: reelmind_upload_data
+  thumb_data:
+    name: reelmind_thumb_data

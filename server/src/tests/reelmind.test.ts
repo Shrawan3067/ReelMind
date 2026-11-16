@@ -29,7 +29,7 @@ beforeAll(async () => {
     fs.existsSync(systemMongod) ? { binary: { systemBinary: systemMongod } } : undefined
   );
   await mongoose.connect(mongoServer.getUri());
-});
+}, 60000);
 
 afterAll(async () => {
   await new Promise(r => setTimeout(r, 300));

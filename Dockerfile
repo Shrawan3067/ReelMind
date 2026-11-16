@@ -15,7 +15,7 @@ COPY server/ ./server/
 RUN npm run build --workspace=shared && npm run build --workspace=server
 
 FROM node:22-alpine
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg curl
 
 WORKDIR /app
 ENV NODE_ENV=production
@@ -27,7 +27,7 @@ COPY --from=builder /app/shared/dist ./shared/dist
 COPY --from=builder /app/server/package.json ./server/
 COPY --from=builder /app/server/dist ./server/dist
 
-RUN mkdir -p /app/uploads /app/thumbnails
+RUN mkdir -p /app/uploads /app/thumbnails && chmod -R 777 /app/uploads /app/thumbnails
 
 EXPOSE 5001
 CMD ["node", "server/dist/server.js"]

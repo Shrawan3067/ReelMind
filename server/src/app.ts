@@ -14,6 +14,7 @@ import storyboardRoutes from './routes/storyboardRoutes';
 import contentRoutes from './routes/contentRoutes';
 import jobRoutes from './routes/jobRoutes';
 import nasRoutes from './routes/nasRoutes';
+import { getAllowedOrigins } from './utils/cors';
 import { NotFoundError } from './utils/errors';
 
 export function createApp() {
@@ -27,7 +28,7 @@ export function createApp() {
 
   app.use(
     cors({
-      origin: [env.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'],
+      origin: getAllowedOrigins(env.CLIENT_URL),
       credentials: true
     })
   );
