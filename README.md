@@ -78,7 +78,12 @@ npm run package:skill
 
 ---
 
-## Docker & Cloud Deployment
+## Production Vercel Deployment
+
+ReelMind is configured for instant full-stack deployment on **Vercel** with both frontend React SPA and backend Express API served from a single unified domain with zero CORS setup:
+
+- **Quick Deploy:** Connect your GitHub repository to Vercel and set `MONGODB_URI` in Project Settings.
+- **Detailed Step-by-Step Guide:** [docs/VERCEL_DEPLOYMENT_GUIDE.md](docs/VERCEL_DEPLOYMENT_GUIDE.md)
 
 ### Local Docker Stack (Development / Staging)
 ```bash
@@ -86,20 +91,10 @@ docker compose up --build
 ```
 Starts MongoDB, Express API (`:5001`), and Client (`:5173`).
 
-### Production AWS EC2 Deployment
-ReelMind is fully containerized and production-ready for deployment onto an AWS EC2 Ubuntu instance with internal database isolation, automated SSL via Let's Encrypt, and zero public port leaks.
-
-- **One-Command Setup on EC2:**
-  ```bash
-  chmod +x deploy/aws-ec2-setup.sh
-  ./deploy/aws-ec2-setup.sh
-  ```
-- **Complete Step-by-Step Guide:** [docs/AWS_EC2_DEPLOYMENT_GUIDE.md](docs/AWS_EC2_DEPLOYMENT_GUIDE.md)
-
 ---
 
 ## Documentation
-- [AWS EC2 Deployment Guide](docs/AWS_EC2_DEPLOYMENT_GUIDE.md)
+- [Vercel Deployment Guide](docs/VERCEL_DEPLOYMENT_GUIDE.md)
 - [Architecture & Multi-Agent Design](docs/ARCHITECTURE.md)
 - [REST API Reference](docs/API.md)
 - [Hackathon Project Proposal](docs/HACKATHON_PROPOSAL.md)

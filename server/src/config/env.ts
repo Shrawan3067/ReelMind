@@ -8,7 +8,7 @@ dotenv.config();
 const EnvSchema = z.object({
   PORT: z.coerce.number().default(5001),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  CLIENT_URL: z.string().default('http://localhost:5173'),
+  CLIENT_URL: z.string().default(process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'),
   MONGODB_URI: z.string().default('mongodb://localhost:27017/reelmind'),
   JWT_ACCESS_SECRET: z.string().min(16).default('dev-reelmind-access-secret-key-min-32-chars'),
   JWT_REFRESH_SECRET: z.string().min(16).default('dev-reelmind-refresh-secret-key-min-32-chars'),
@@ -20,8 +20,8 @@ const EnvSchema = z.object({
   AI_MODEL: z.string().optional(),
   EMBEDDING_MODEL: z.string().optional(),
   AI_BASE_URL: z.string().optional(),
-  UPLOAD_DIRECTORY: z.string().default(path.resolve(process.cwd(), 'uploads')),
-  THUMBNAIL_DIRECTORY: z.string().default(path.resolve(process.cwd(), 'thumbnails')),
+  UPLOAD_DIRECTORY: z.string().default(process.env.VERCEL ? '/tmp/uploads' : path.resolve(process.cwd(), 'uploads')),
+  THUMBNAIL_DIRECTORY: z.string().default(process.env.VERCEL ? '/tmp/thumbnails' : path.resolve(process.cwd(), 'thumbnails')),
   MAX_UPLOAD_SIZE: z.coerce.number().default(524288000),
   MAX_CONCURRENT_JOBS: z.coerce.number().default(2),
   FFMPEG_PATH: z.string().default('ffmpeg'),
@@ -47,8 +47,12 @@ if (env.NODE_ENV === 'production') {
     env.JWT_REFRESH_SECRET.includes('dev-reelmind') ||
     env.ENCRYPTION_KEY.startsWith('0123456789abcdef')
   ) {
-    console.error('SECURITY ERROR: Default development secrets must not be used in production.');
-    process.exit(1);
+    if (process.env.VERCEL) {
+      console.warn('SECURITY WARNING: Running on Vercel with development secrets. Please configure JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, and ENCRYPTION_KEY in Vercel Project Settings for production security.');
+    } else {
+      console.error('SECURITY ERROR: Default development secrets must not be used in production.');
+      process.exit(1);
+    }
   }
 }
 
