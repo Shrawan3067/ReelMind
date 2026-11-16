@@ -73,6 +73,20 @@ if [ "$PKG_MGR" = "dnf" ] || [ "$PKG_MGR" = "yum" ]; then
     $SUDO ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/bin/docker-compose 2>/dev/null || true
   fi
 
+  # Install docker buildx plugin if not present (Required for Docker Compose v2 build)
+  if ! docker buildx version &> /dev/null; then
+    echo "Installing Docker Buildx plugin..."
+    BUILDX_ARCH="amd64"
+    [ "$(uname -m)" = "aarch64" ] && BUILDX_ARCH="arm64"
+    BUILDX_VER="v0.21.1"
+    $SUDO mkdir -p /usr/local/lib/docker/cli-plugins /usr/libexec/docker/cli-plugins
+    $SUDO curl -SL "https://github.com/docker/buildx/releases/download/${BUILDX_VER}/buildx-${BUILDX_VER}.linux-${BUILDX_ARCH}" -o /usr/local/lib/docker/cli-plugins/docker-buildx
+    $SUDO chmod +x /usr/local/lib/docker/cli-plugins/docker-buildx
+    $SUDO cp /usr/local/lib/docker/cli-plugins/docker-buildx /usr/libexec/docker/cli-plugins/docker-buildx 2>/dev/null || true
+    mkdir -p ~/.docker/cli-plugins 2>/dev/null || true
+    cp /usr/local/lib/docker/cli-plugins/docker-buildx ~/.docker/cli-plugins/docker-buildx 2>/dev/null || true
+  fi
+
   # Add user to docker group
   TARGET_USER="${SUDO_USER:-$USER}"
   $SUDO usermod -aG docker "$TARGET_USER" || true
