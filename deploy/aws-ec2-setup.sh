@@ -44,8 +44,8 @@ echo -e "Detected EC2 Public IP: ${GREEN}${PUBLIC_IP}${NC}"
 # 2. Package Updates and Prerequisites
 echo -e "\n${BOLD}[2/7] Installing prerequisites and Git...${NC}"
 if [ "$PKG_MGR" = "dnf" ] || [ "$PKG_MGR" = "yum" ]; then
-  $SUDO $PKG_MGR update -y
-  $SUDO $PKG_MGR install -y git openssl curl ca-certificates jq
+  $SUDO $PKG_MGR update -y --allowerasing || true
+  $SUDO $PKG_MGR install -y --allowerasing git openssl ca-certificates jq || $SUDO $PKG_MGR install -y git openssl ca-certificates
 elif [ "$PKG_MGR" = "apt" ]; then
   $SUDO apt-get update -y
   $SUDO apt-get install -y ca-certificates curl gnupg lsb-release git openssl ufw jq
@@ -57,7 +57,7 @@ if [ "$PKG_MGR" = "dnf" ] || [ "$PKG_MGR" = "yum" ]; then
   # Amazon Linux / RHEL / Fedora
   if ! command -v docker &> /dev/null; then
     echo "Installing Docker via $PKG_MGR..."
-    $SUDO $PKG_MGR install -y docker
+    $SUDO $PKG_MGR install -y --allowerasing docker
     $SUDO systemctl enable docker
     $SUDO systemctl start docker
   fi
@@ -65,10 +65,12 @@ if [ "$PKG_MGR" = "dnf" ] || [ "$PKG_MGR" = "yum" ]; then
   # Install docker compose plugin if not present
   if ! docker compose version &> /dev/null; then
     echo "Installing Docker Compose plugin..."
-    $SUDO mkdir -p /usr/local/lib/docker/cli-plugins
     ARCH=$(uname -m)
+    $SUDO mkdir -p /usr/local/lib/docker/cli-plugins /usr/libexec/docker/cli-plugins
     $SUDO curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-${ARCH}" -o /usr/local/lib/docker/cli-plugins/docker-compose
     $SUDO chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+    $SUDO cp /usr/local/lib/docker/cli-plugins/docker-compose /usr/libexec/docker/cli-plugins/docker-compose 2>/dev/null || true
+    $SUDO ln -sf /usr/local/lib/docker/cli-plugins/docker-compose /usr/bin/docker-compose 2>/dev/null || true
   fi
 
   # Add user to docker group
